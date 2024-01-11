@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
 
 enum BinOpType {
   T_PLUS,
@@ -153,7 +155,7 @@ struct cmd {
     struct {struct expr * arg; } WI;
     struct {struct expr * arg; } WC;
     // 用于声明数组
-    struct { char * name; struct expr * size; struct init_list * init_expr;} ARR_DECL; 
+    struct { char * name; struct expr * size; struct init_list * init_expr; } ARR_DECL; 
     // 用于声明指针类型
     struct { char * name; int ptr_level; struct expr * size;} PTR_DECL; 
     // 字符变量声明

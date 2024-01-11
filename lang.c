@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lang.h"
+#include <stdbool.h>
+#include <string.h>
 
 // 打印缩进, 使语法树美观
 void print_indent(int depth) {
@@ -236,7 +238,7 @@ struct cmd * TArrDecl(char * name, struct expr * size, struct init_list * init_e
   struct cmd * res = new_cmd_ptr();
   res->t = T_ARR_DECL;
   res->d.ARR_DECL.name = name;
-  res->d.ARR_DECL.size = size; 
+  res->d.ARR_DECL.size = size;   
   res->d.ARR_DECL.init_expr = init_expr;
   return res;
 }
@@ -315,7 +317,7 @@ void print_init_list(struct init_list *list, int depth) {
       printf("Empty List");
     }
     while (current != NULL) {
-        print_expr(current->expr, depth );
+        print_expr(current->expr, depth);
         current = current->next;
     }
 
@@ -325,14 +327,15 @@ void print_init_list(struct init_list *list, int depth) {
 
 
 // 用于打印字符列表相关信息
-void print_char_list(struct init_list *list, int depth) {
+int print_char_list(struct init_list *list, int depth) {
+    int list_size = 0;
     print_indent(depth);
     printf("CHAR_LIST\n");
 
     if (list == NULL) {
         print_indent(depth + 1);
         printf("NULL\n");
-        return;
+        return list_size;
     }
 
     struct expr_list *current = list->exprs;
@@ -340,10 +343,12 @@ void print_char_list(struct init_list *list, int depth) {
         print_indent(depth + 1);
         printf("CHAR('%c')\n", current->expr->d.CHAR.c[1]);
         current = current->next;
+        list_size += 1;
     }
 
     print_indent(depth);
     printf("\n");
+    return list_size;
 }
 
 
@@ -784,18 +789,38 @@ void print_cmd(struct cmd *c, int depth) {
     case T_STRING_DECL_STRING:
         printf("STRING_DECL(%s)\n", c->d.STRING_DECL_STRING.name);
         if (c->d.STRING_DECL_STRING.init_expr != NULL) {
+            unsigned int malloc_size = c->d.STRING_DECL_STRING.size->d.CONST.value;
+            unsigned int init_size = strlen(c->d.STRING_DECL_STRING.init_expr->d.STRING.str) - 2;
+            print_indent(depth + 1);
+            printf("Malloc Size:\n");
+            print_indent(depth + 2);
+            printf("%d\n", malloc_size);
             print_indent(depth + 1);
             printf("Init String:\n");
             print_expr(c->d.STRING_DECL_STRING.init_expr, depth + 2);
+            if(malloc_size < init_size)
+                printf("Error: Array initialization exceeds declared size.\n");
+            else
+                printf("Legal init size\n");
         }
         break;
     // 字符串声明情形(以字符数组初始化)
     case T_STRING_DECL_ARRAY:
         printf("STRING_DECL(%s)\n", c->d.STRING_DECL_ARRAY.name);
         if (c->d.STRING_DECL_ARRAY.init_expr != NULL) {
+            int malloc_size = c->d.STRING_DECL_ARRAY.size->d.CONST.value;
+            print_indent(depth + 1);
+            printf("Malloc Size:\n");
+            print_indent(depth + 2);
+            printf("%d\n", malloc_size);
+
             print_indent(depth + 1);
             printf("Init String:\n");
-            print_char_list(c->d.STRING_DECL_ARRAY.init_expr, depth + 2);
+            int list_size = print_char_list(c->d.STRING_DECL_ARRAY.init_expr, depth + 2);
+            if(malloc_size < list_size)
+                printf("Error: Array initialization exceeds declared size.\n");
+            else
+                printf("Legal init size\n");
         }
         break;
     // 单语句多变量声明情形

@@ -1,3 +1,4 @@
+## 要求1
 ```
 DECLARATION
   Object:
@@ -170,6 +171,7 @@ ASGN
                           CONST(8)
 ```
 
+## 要求2
 ```
 DECLARATION
   Object:
@@ -274,6 +276,7 @@ PTR_DECL(a, level: 1)
       VAR(n)
 ```
 
+## 要求3
 ```
 CHAR_DECL(a)
 CHAR_DECL(a)
@@ -369,6 +372,44 @@ DECLARATION
       CONST(4)
       CONST(5)
       CONST(6)
+```
+
+## 字符串合法性检查
+```
+STRING_DECL(a)
+  Malloc Size:
+    3
+  Init String:
+    STRING("hel")
+Legal init size
+STRING_DECL(a)
+  Malloc Size:
+    3
+  Init String:
+    STRING("hello")
+Error: Array initialization exceeds declared size.
+STRING_DECL(a)
+  Malloc Size:
+    3
+  Init String:
+    CHAR_LIST
+      CHAR('1')
+      CHAR('2')
+      CHAR('3')
+
+Legal init size
+STRING_DECL(a)
+  Malloc Size:
+    3
+  Init String:
+    CHAR_LIST
+      CHAR('h')
+      CHAR('e')
+      CHAR('l')
+      CHAR('l')
+      CHAR('o')
+
+Error: Array initialization exceeds declared size.
 ```
 
 
